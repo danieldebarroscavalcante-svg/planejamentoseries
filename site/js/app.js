@@ -2,7 +2,7 @@
 
 import { montarBase } from './nucleo/modelo.js';
 import { hojeEm, formatarData } from './nucleo/datas.js';
-import { verificar } from './nucleo/regras.js';
+import { pendenciasAtuais, verificar } from './nucleo/regras.js';
 import { esc } from './ui.js';
 import { acompanharAparelho, aplicarAparencia, configComCores, preferencias } from './aparencia.js';
 import * as painel from './telas/painel.js';
@@ -74,7 +74,7 @@ function desenhar() {
   const ctx = {
     ...estado,
     params,
-    pendencias: verificar(estado.base, estado.config, estado.hoje),
+    pendencias: pendenciasAtuais(verificar(estado.base, estado.config, estado.hoje), estado.hoje),
     aoMudarAparencia: () => { atualizarAparencia(); desenhar(); },
   };
   raiz.innerHTML = tela.render(ctx, partes, params);

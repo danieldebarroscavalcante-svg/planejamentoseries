@@ -1,6 +1,6 @@
 import { pessoaPendente, semAcento, slug } from '../nucleo/modelo.js';
 import { MESES, diasEntre, diaMes } from '../nucleo/datas.js';
-import { comMensagem, series } from '../nucleo/regras.js';
+import { comMensagem, quandoFalta, series } from '../nucleo/regras.js';
 import { textoWhatsApp } from '../nucleo/formatos.js';
 import { chipSerie, copiar, corDaSerie, esc, listaDomingos, pessoa, selos, statusBadge } from '../ui.js';
 
@@ -63,7 +63,8 @@ function listaPendencias(ctx) {
   const blocos = grupos.map(([nivel, titulo]) => {
     const itens = ctx.pendencias.filter((p) => p.nivel === nivel);
     if (!itens.length) return '';
-    const lis = itens.map((p) => `<li class="pend pend-${nivel}">${p.data ? `<a href="#/domingo/${p.data}">${esc(p.mensagem)}</a>` : esc(p.mensagem)}</li>`).join('');
+    const texto = (p) => esc(p.mensagem) + (p.dias !== undefined ? ` <strong>(${quandoFalta(p.dias)})</strong>` : '');
+    const lis = itens.map((p) => `<li class="pend pend-${nivel}">${p.data ? `<a href="#/domingo/${p.data}">${texto(p)}</a>` : texto(p)}</li>`).join('');
     const aberto = nivel !== 'aviso' || ctx.params.get('ver') === 'pendencias' ? ' open' : '';
     return `<details class="cartao"${aberto}><summary><strong>${titulo}</strong> (${itens.length})</summary><ul class="pendencias">${lis}</ul></details>`;
   }).join('');

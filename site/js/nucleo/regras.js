@@ -64,9 +64,22 @@ export function series(base, config) {
 
 // ---------------------------------------------------------------------------
 
+// Avisos sobre pessoas (domingos seguidos, limite mensal, feriadão) só importam enquanto a data não passou.
+const AVISOS_DE_PESSOAS = new Set(['domingos-seguidos', 'limite-mensal', 'feriadao']);
+
+/** Remove avisos de pessoas cujas datas já passaram. Erros e alertas ficam sempre. */
+export function pendenciasAtuais(lista, hoje) {
+  return lista.filter((x) => !(AVISOS_DE_PESSOAS.has(x.codigo) && x.data && x.data < hoje));
+}
+
+/** "hoje", "amanhã", "em 9 dias" */
+export function quandoFalta(dias) {
+  return dias === 0 ? 'hoje' : dias === 1 ? 'amanhã' : `em ${dias} dias`;
+}
+
 export function verificar(base, config, hoje) {
   const p = [];
-  const add = (nivel, codigo, mensagem, data) => p.push({ nivel, codigo, mensagem, ...(data ? { data } : {}) });
+  const add = (nivel, codigo, mensagem, data, extra = {}) => p.push({ nivel, codigo, mensagem, ...(data ? { data } : {}), ...extra });
   const lim = config?.limites ?? {};
   const domingos = base.domingos.filter((d) => d.data);
   const mensagens = domingos.filter((d) => !d.semMinistracao);
@@ -77,10 +90,9 @@ export function verificar(base, config, hoje) {
   const limite = somarDias(hoje, lim.diasAlerta ?? 30);
   for (const d of mensagens) {
     if (d.data < hoje || d.data > limite) continue;
-    const faltam = diasEntre(hoje, d.data);
-    const quando = faltam === 0 ? 'hoje' : faltam === 1 ? 'amanhã' : `em ${faltam} dias`;
-    if (pessoaPendente(d.preletor)) add('alerta', 'sem-preletor', `${formatarData(d.data)} (${quando}): sem preletor definido.`, d.data);
-    if (pessoaPendente(d.saudacao)) add('alerta', 'sem-saudacao', `${formatarData(d.data)} (${quando}): sem saudação definida.`, d.data);
+    const dias = diasEntre(hoje, d.data);
+    if (pessoaPendente(d.preletor)) add('alerta', 'sem-preletor', `${formatarData(d.data)}: sem preletor definido.`, d.data, { dias });
+    if (pessoaPendente(d.saudacao)) add('alerta', 'sem-saudacao', `${formatarData(d.data)}: sem saudação definida.`, d.data, { dias });
   }
 
   // ---- Datas ----
@@ -164,7 +176,7 @@ export function verificar(base, config, hoje) {
     }
     if (max) {
       for (const lista of porMes.values()) {
-        if (lista.length > max) add('aviso', 'limite-mensal', `${lista[0][campo]} ${nome} ${lista.length} vezes em ${nomeMes(chaveMes(lista[0].data))} (limite: ${max}).`, lista[0].data);
+        if (lista.length > max) add('aviso', 'limite-mensal', `${lista[0][campo]} ${nome} ${lista.length} vezes em ${nomeMes(chaveMes(lista[0].data))} (limite: ${max}).`, lista.at(-1).data);
       }
     }
   }

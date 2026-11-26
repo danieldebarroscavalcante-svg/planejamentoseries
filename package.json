@@ -5,6 +5,9 @@
   "description": "Gestão das ministrações de domingo",
   "scripts": {
     "converter": "python3 scripts/xlsx_para_csv.py dados/cronograma-2027.xlsx dados/csv",
-    "snapshot": "node scripts/gerar-snapshot.mjs"
+    "snapshot": "node scripts/gerar-snapshot.mjs",
+    "test": "node --test \"testes/*.test.mjs\"",
+    "automacao": "node scripts/automacao.mjs --mostrar-issue",
+    "site": "node scripts/montar-site.mjs"
   }
 }

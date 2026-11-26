@@ -1,0 +1,77 @@
+# Rotina automática: todo dia de manhã e a cada alteração no repositório.
+#  1. Baixa as abas publicadas da planilha do Google
+#  2. Confere as regras e atualiza a Issue de pendências
+#  3. Guarda a cópia de segurança dados/cronograma.json
+#  4. Gera as agendas .ics e publica o site no GitHub Pages
+#
+# Tudo gratuito em repositório público. Para rodar na hora: aba Actions → "Publicar o site" → Run workflow.
+name: Publicar o site
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # 06:17 em Brasília (09:17 UTC)
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Testar as regras de conferência
+        run: npm test
+
+      - name: Ler a planilha, conferir, gerar agendas e montar o site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: node scripts/automacao.mjs
+
+      - name: Guardar a cópia de segurança (se mudou)
+        run: |
+          if git diff --quiet -- dados/cronograma.json; then
+            echo "Cópia de segurança sem mudanças."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add dados/cronograma.json
+            git commit -m "Atualiza cópia de segurança da escala"
+            git push
+          fi
+
+      - name: Preparar o GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Enviar o site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    needs: atualizar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
