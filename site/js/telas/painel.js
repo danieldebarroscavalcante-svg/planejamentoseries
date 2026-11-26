@@ -1,5 +1,5 @@
 import { pessoaPendente, semAcento, slug } from '../nucleo/modelo.js';
-import { dataPorExtenso, diasEntre, diaMes } from '../nucleo/datas.js';
+import { MESES, diasEntre, diaMes } from '../nucleo/datas.js';
 import { comMensagem, series } from '../nucleo/regras.js';
 import { textoWhatsApp } from '../nucleo/formatos.js';
 import { chipSerie, copiar, corDaSerie, esc, listaDomingos, pessoa, selos, statusBadge } from '../ui.js';
@@ -10,24 +10,25 @@ function quando(hoje, data) {
 }
 
 function destaque(d, ctx) {
-  if (!d) return `<section class="cartao destaque"><h2>Ano encerrado</h2><p>Não há mais domingos programados no cronograma.</p></section>`;
+  if (!d) return `<section class="heroi"><p class="sobretitulo">Cronograma</p><h1 class="heroi-titulo">Ano encerrado.</h1><p class="heroi-tema">Não há mais domingos programados.</p></section>`;
+  const [ano, mes, dia] = d.data.split('-');
   const corpo = d.semMinistracao
-    ? `<p class="destaque-tema">${esc(d.tema || 'Sem ministração')}</p>${d.observacoes ? `<p class="mudo">${esc(d.observacoes)}</p>` : ''}`
-    : `<p class="destaque-texto">${esc(d.texto)}</p>
-       <p class="destaque-tema">${esc(d.tema)}</p>
+    ? `<p class="heroi-texto gradiente">${esc(d.tema || 'Sem ministração')}</p>${d.observacoes ? `<p class="heroi-tema">${esc(d.observacoes)}</p>` : ''}`
+    : `<p class="heroi-texto gradiente">${esc(d.texto)}</p>
+       <p class="heroi-tema">${esc(d.tema)}</p>
+       <div class="item-topo">${chipSerie(d, ctx, { curto: false })} ${statusBadge(d.status)} ${selos(d, ctx)}</div>
        <dl class="destaque-pessoas">
          <div><dt>Preletor</dt><dd>${pessoa(d.preletor)}</dd></div>
          <div><dt>Saudação</dt><dd>${pessoa(d.saudacao)}</dd></div>
        </dl>`;
-  return `<section class="cartao destaque" style="--cor:${esc(corDaSerie(d.serie, ctx.config))}">
-    <p class="rotulo">Próximo domingo · ${quando(ctx.hoje, d.data)}</p>
-    <h2>${dataPorExtenso(d.data)}</h2>
-    <div class="item-topo">${chipSerie(d, ctx, { curto: false })} ${statusBadge(d.status)} ${selos(d, ctx)}</div>
-    ${d.feriado ? `<p class="feriado-texto">${esc(d.feriado)}</p>` : ''}
+  return `<section class="heroi" style="--cor:${esc(corDaSerie(d.serie, ctx.config))}">
+    <p class="sobretitulo">Próximo domingo · ${quando(ctx.hoje, d.data)}</p>
+    <h1 class="heroi-titulo">${Number(dia)} de ${MESES[Number(mes) - 1]}<span class="heroi-ano">${ano}</span></h1>
     ${corpo}
+    ${d.feriado ? `<p class="feriado-texto">${esc(d.feriado)}</p>` : ''}
     <div class="botoes">
-      <a class="botao" href="#/domingo/${d.data}">Ver detalhes</a>
-      ${d.semMinistracao ? '' : '<button type="button" class="botao botao-secundario" data-acao="copiar">Copiar texto para WhatsApp</button>'}
+      ${d.semMinistracao ? '' : '<button type="button" class="botao" data-acao="copiar">Copiar texto para WhatsApp</button>'}
+      <a class="botao botao-secundario" href="#/domingo/${d.data}">Ver detalhes</a>
     </div>
   </section>`;
 }
@@ -44,7 +45,7 @@ function contadores(ctx) {
   const tile = (valor, rotulo, href, tom = '') =>
     `<a class="contador ${valor ? tom : 'zerado'}" href="${href}"><strong>${valor}</strong><span>${rotulo}</span></a>`;
   const dias = ctx.config.limites?.diasAlerta ?? 30;
-  return `<section class="contadores" aria-label="Pendências">
+  return `<h2 class="titulo-secao">Em números.</h2><section class="contadores" aria-label="Pendências">
     ${tile(n.alertas, `alertas nos próximos ${dias} dias`, '#/painel?ver=pendencias', 'tom-alerta')}
     ${tile(n.preletor, 'domingos sem preletor', '#/cronograma?pendentes=1', 'tom-alerta')}
     ${tile(n.saudacao, 'domingos sem saudação', '#/cronograma?pendentes=1', 'tom-alerta')}
@@ -85,7 +86,7 @@ function progresso(ctx) {
         <div class="mudo">${feitas} de ${lista.length} realizadas · ${comPreletor} com preletor</div>
       </li>`;
     }).join('');
-  return `<section class="cartao"><h2>Séries</h2><ul class="progresso">${linhas}</ul></section>`;
+  return `<h2 class="titulo-secao">Séries.</h2><section class="cartao"><ul class="progresso">${linhas}</ul></section>`;
 }
 
 export function render(ctx) {
@@ -96,12 +97,12 @@ export function render(ctx) {
     ${contadores(ctx)}
     <div class="duas-colunas">
       <div>
-        <section class="cartao"><h2>Próximos domingos</h2>${listaDomingos(resto.slice(0, 4), ctx)}
-          <p><a href="#/cronograma">Ver cronograma completo →</a></p></section>
+        <h2 class="titulo-secao">Próximos domingos.</h2>${listaDomingos(resto.slice(0, 4), ctx)}
+        <p><a href="#/cronograma">Ver cronograma completo ›</a></p>
       </div>
       <div>
         ${progresso(ctx)}
-        <section id="pendencias"><h2 class="titulo-secao">Pendências</h2>${listaPendencias(ctx)}</section>
+        <section id="pendencias"><h2 class="titulo-secao">Pendências.</h2>${listaPendencias(ctx)}</section>
       </div>
     </div>`;
 }

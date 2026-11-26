@@ -18,10 +18,12 @@ export function render(ctx, [, data]) {
 
   return `
     <nav class="voltar"><a href="#/cronograma">← Cronograma</a></nav>
-    <article class="cartao detalhe" style="--cor:${esc(corDaSerie(d.serie, ctx.config))}">
-      <p class="rotulo">${d.numero ? `Ministração nº ${d.numero}` : 'Domingo'}</p>
-      <h1>${dataPorExtenso(d.data)}</h1>
-      <div class="item-topo">${statusBadge(d.status)} ${selos(d, ctx)}</div>
+    <article class="detalhe" style="--cor:${esc(corDaSerie(d.serie, ctx.config))}">
+      <div class="detalhe-topo">
+        <p class="rotulo">${d.numero ? `Ministração nº ${d.numero}` : 'Domingo'}</p>
+        <h1>${dataPorExtenso(d.data)}</h1>
+        <div class="item-topo">${statusBadge(d.status)} ${selos(d, ctx)}</div>
+      </div>
       ${pend.length ? `<ul class="pendencias">${pend.map((p) => `<li class="pend pend-${p.nivel}">${esc(p.mensagem)}</li>`).join('')}</ul>` : ''}
       <dl class="campos">
         ${campo('Data', formatarData(d.data))}

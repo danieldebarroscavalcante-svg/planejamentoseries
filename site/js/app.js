@@ -63,6 +63,7 @@ function desenhar() {
   };
   raiz.innerHTML = tela.render(ctx, partes, params);
   tela.ligar?.(ctx, raiz, partes, params);
+  revelarAoRolar(raiz);
   document.title = `${tela.titulo} · ${estado.config.titulo ?? 'Ministrações'}`;
   document.querySelectorAll('[data-nav]').forEach((a) => {
     const ativo = a.dataset.nav === nome || (nome === 'domingo' && a.dataset.nav === 'cronograma');
@@ -70,6 +71,22 @@ function desenhar() {
     else a.removeAttribute('aria-current');
   });
   desenharRodape();
+}
+
+// Entrada suave dos blocos quando aparecem na tela.
+const observador = 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches
+  ? new IntersectionObserver((itens) => itens.forEach((i) => {
+    if (i.isIntersecting) { i.target.classList.add('visivel'); observador.unobserve(i.target); }
+  }), { rootMargin: '0px 0px -8% 0px' })
+  : null;
+
+function revelarAoRolar(raiz) {
+  if (!observador) return;
+  observador.disconnect();
+  raiz.querySelectorAll('.heroi > *, .titulo-secao, .cartao, .contador, .lista > li, .campos > div, .whatsapp').forEach((el) => {
+    el.classList.add('revelar');
+    observador.observe(el);
+  });
 }
 
 function desenharRodape() {
