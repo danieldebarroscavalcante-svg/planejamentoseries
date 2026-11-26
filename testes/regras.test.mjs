@@ -191,3 +191,33 @@ test('avisos de pessoas em datas passadas somem; erros ficam', () => {
   assert.ok(!codigos(atuais).includes('feriadao'));
   assert.ok(codigos(atuais).includes('data-duplicada'));
 });
+
+test('seguir o guia "Adiar uma mensagem" do README deixa a escala sem erros', () => {
+  // Abrir espaço em 29/08 (Efésios 6 de 11) para um domingo especial.
+  const datas = ['29/08/2027', '05/09/2027', '12/09/2027', '19/09/2027', '26/09/2027', '03/10/2027'];
+  const b = base((pl) => {
+    const D = 3, L = 11; // colunas Texto..Observações
+    const conteudo = datas.map((d) => pl.linha(d).slice(D, L + 1));
+    // passo 1: a última (11 de 11) é juntada à penúltima, nas Observações
+    conteudo[4][L - D] = `${conteudo[4][L - D] ?? ''} + ${conteudo[5][1]}`;
+    // passos 2-3: desce uma linha, do adiado até o penúltimo
+    for (let i = datas.length - 1; i >= 1; i--) pl.linha(datas[i]).splice(D, L - D + 1, ...conteudo[i - 1]);
+    // passo 4: preenche o domingo liberado
+    pl.linha('29/08/2027').splice(D, L - D + 1, 'Mt 28:18-20', 'Especial — Missões', '', '', 'Especial — Missões', 'Especial', 'Planejado', '', '');
+    // passo 6: "de 11" → "de 10"
+    for (const l of pl.linhas) if (l[7].startsWith('Efésios')) l[8] = l[8].replace('de 11', 'de 10');
+  });
+  const config = { ...CONFIG, series: CONFIG.series.map((s) => (s.prefixo === 'Efésios' ? { ...s, mensagens: 10 } : s)) };
+  assert.deepEqual(verificar(b, config, ANTES_DO_ANO), []);
+  // e sem o passo 6 o sistema aponta o problema
+  assert.ok(codigos(verificar(b, CONFIG, ANTES_DO_ANO), 'erro').includes('contagem-da-serie'));
+});
+
+test('cadastrar o livro do AT pelo "caminho completo" do README (prefixo novo no config)', () => {
+  const b = base((pl) => {
+    for (const l of pl.linhas) if (l[7] === 'Antigo Testamento — a definir') l[7] = 'Neemias — Reconstruir';
+  });
+  const config = { ...CONFIG, series: CONFIG.series.map((s) => (s.prefixo === 'Antigo Testamento' ? { ...s, prefixo: 'Neemias', curto: 'Neemias' } : s)) };
+  assert.deepEqual(verificar(b, config, ANTES_DO_ANO), []);
+  assert.ok(codigos(verificar(b, CONFIG, ANTES_DO_ANO)).includes('serie-desconhecida'));
+});
