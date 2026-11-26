@@ -51,3 +51,25 @@ export function dataPorExtenso(iso) {
   const [a, m, d] = iso.split('-');
   return `${Number(d)} de ${MESES[Number(m) - 1]} de ${a}`;
 }
+
+/** Domingo de Páscoa (calendário gregoriano). pascoa(2027) → "2027-03-28" */
+export function pascoa(ano) {
+  const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31);
+  const dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+}
+
+/** Todos os domingos de um ano, em ordem. */
+export function domingosDoAno(ano) {
+  let d = `${ano}-01-01`;
+  d = somarDias(d, (7 - diaDaSemana(d)) % 7);
+  const lista = [];
+  for (; d.startsWith(String(ano)); d = somarDias(d, 7)) lista.push(d);
+  return lista;
+}

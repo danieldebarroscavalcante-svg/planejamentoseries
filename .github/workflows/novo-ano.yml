@@ -1,0 +1,32 @@
+# Gera os arquivos de partida para um novo ano (ex.: 2028).
+# Como usar: aba Actions → "Preparar novo ano" → Run workflow → digite o ano → Run workflow.
+# Ao terminar, abra a execução e baixe o pacote "arquivos-novo-ano" no fim da página.
+name: Preparar novo ano
+
+on:
+  workflow_dispatch:
+    inputs:
+      ano:
+        description: "Ano a preparar (ex.: 2028)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Gerar cronograma em branco e sugestão de configuração
+        env:
+          ANO: ${{ inputs.ano }}
+        run: node scripts/novo-ano.mjs "$ANO"
+      - name: Disponibilizar para download
+        uses: actions/upload-artifact@v7
+        with:
+          name: arquivos-novo-ano
+          path: novo-ano/
