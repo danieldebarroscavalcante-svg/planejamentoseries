@@ -88,7 +88,7 @@ export function avisar(mensagem) {
   avisar.timer = setTimeout(() => { t.hidden = true; }, 2500);
 }
 
-export async function copiar(texto) {
+export async function copiar(texto, mensagem = 'Texto copiado! É só colar no WhatsApp.') {
   try {
     await navigator.clipboard.writeText(texto);
   } catch {
@@ -101,6 +101,6 @@ export async function copiar(texto) {
     document.execCommand('copy');
     area.remove();
   }
-  avisar('Texto copiado! É só colar no WhatsApp.');
+  avisar(mensagem);
 }
 

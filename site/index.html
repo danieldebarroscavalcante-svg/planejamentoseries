@@ -8,9 +8,22 @@
   <meta name="description" content="Escala das ministrações de domingo: datas, textos, temas, preletores e saudação.">
   <title>Ministrações</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A5A'/%3E%3Cpath d='M9 8h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H9zM23 8h-2a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H23z' fill='%23fff'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <script>
+    // Aplica claro/escuro e tamanho do texto antes de desenhar a página (evita "piscar").
+    // O restante da aparência é aplicado por js/aparencia.js.
+    (function () {
+      var p = {};
+      try { p = JSON.parse(localStorage.getItem('aparencia') || '{}') || {}; } catch (e) {}
+      var d = document.documentElement.dataset, z = p.zonas || {};
+      var tema = p.tema || 'escuro';
+      if (tema === 'auto') tema = matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+      d.tema = tema;
+      ['topo', 'destaque', 'cartoes', 'rodape'].forEach(function (k) {
+        if (z[k] === 'claro' || z[k] === 'escuro') d['z' + k[0].toUpperCase() + k.slice(1)] = z[k];
+      });
+      if (p.tamanho) document.documentElement.style.setProperty('--escala', p.tamanho);
+    })();
+  </script>
   <link rel="stylesheet" href="css/estilo.css">
   <script type="module" src="js/app.js"></script>
 </head>
@@ -19,6 +32,9 @@
   <header class="topo">
     <div class="topo-interno">
       <a class="marca" href="#/painel">Ministrações</a>
+      <a class="botao-aparencia" href="#/aparencia" data-nav="aparencia" aria-label="Aparência: claro, escuro, cores e mais" title="Aparência">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </a>
       <nav class="menu" aria-label="Principal">
         <a href="#/painel" data-nav="painel">Painel</a>
         <a href="#/cronograma" data-nav="cronograma">Cronograma</a>

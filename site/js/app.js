@@ -4,17 +4,26 @@ import { montarBase } from './nucleo/modelo.js';
 import { hojeEm, formatarData } from './nucleo/datas.js';
 import { verificar } from './nucleo/regras.js';
 import { esc } from './ui.js';
+import { acompanharAparelho, aplicarAparencia, configComCores, preferencias } from './aparencia.js';
 import * as painel from './telas/painel.js';
 import * as cronograma from './telas/cronograma.js';
 import * as domingo from './telas/domingo.js';
 import * as seriesTela from './telas/series.js';
 import * as equipe from './telas/equipe.js';
 import * as imprimir from './telas/imprimir.js';
+import * as aparencia from './telas/aparencia.js';
 
-const TELAS = { painel, cronograma, domingo, series: seriesTela, equipe, imprimir };
+const TELAS = { painel, cronograma, domingo, series: seriesTela, equipe, imprimir, aparencia };
 const TEMPO_LIMITE_MS = 8000;
 
-const estado = { config: null, base: null, origem: '', atualizadoEm: '', agenda: null, hoje: '' };
+const estado = { config: null, configOriginal: null, prefs: null, base: null, origem: '', atualizadoEm: '', agenda: null, hoje: '' };
+
+/** Lê as preferências de aparência, aplica no documento e nas cores das séries. */
+function atualizarAparencia() {
+  estado.prefs = preferencias(estado.configOriginal);
+  aplicarAparencia(estado.prefs);
+  estado.config = configComCores(estado.configOriginal, estado.prefs);
+}
 
 async function buscar(url, tipo = 'json') {
   const ctrl = new AbortController();
@@ -45,6 +54,12 @@ function definirHoje() {
 }
 
 function rota() {
+  if (!location.hash.replace(/^#\/?/, '')) {
+    // Sem endereço: abre a tela escolhida em Aparência → "Abrir o site em".
+    const inicio = estado.prefs?.inicio ?? 'painel';
+    if (inicio === 'calendario') return { nome: 'cronograma', partes: ['cronograma'], params: new URLSearchParams('visao=calendario') };
+    return { nome: TELAS[inicio] ? inicio : 'painel', partes: [inicio], params: new URLSearchParams() };
+  }
   const [caminho, consulta] = location.hash.replace(/^#\/?/, '').split('?');
   const partes = caminho.split('/').filter(Boolean);
   const nome = TELAS[partes[0]] ? partes[0] : 'painel';
@@ -60,10 +75,12 @@ function desenhar() {
     ...estado,
     params,
     pendencias: verificar(estado.base, estado.config, estado.hoje),
+    aoMudarAparencia: () => { atualizarAparencia(); desenhar(); },
   };
   raiz.innerHTML = tela.render(ctx, partes, params);
   tela.ligar?.(ctx, raiz, partes, params);
-  revelarAoRolar(raiz);
+  if (!tela.semAnimacao && estado.prefs.animacoes) revelarAoRolar(raiz);
+  else observador?.disconnect();
   document.title = `${tela.titulo} · ${estado.config.titulo ?? 'Ministrações'}`;
   document.querySelectorAll('[data-nav]').forEach((a) => {
     const ativo = a.dataset.nav === nome || (nome === 'domingo' && a.dataset.nav === 'cronograma');
@@ -104,10 +121,12 @@ function erro(mensagem) {
 
 async function iniciar() {
   try {
-    estado.config = await buscar('config.json');
+    estado.configOriginal = await buscar('config.json');
   } catch (e) {
     return erro(`Arquivo de configuração indisponível (${e.message}).`);
   }
+  atualizarAparencia();
+  acompanharAparelho(() => estado.prefs);
   definirHoje();
   window.addEventListener('hashchange', () => { desenhar(); window.scrollTo(0, 0); });
 

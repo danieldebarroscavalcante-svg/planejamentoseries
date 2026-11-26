@@ -90,21 +90,22 @@ function progresso(ctx) {
 }
 
 export function render(ctx) {
+  const mostrar = ctx.prefs?.painel ?? {};
   const proximos = ctx.base.domingos.filter((d) => d.data >= ctx.hoje);
   const [primeiro, ...resto] = proximos;
+  const blocoProximos = mostrar.proximos === false ? '' : `<div>
+        <h2 class="titulo-secao">Próximos domingos.</h2>${listaDomingos(resto.slice(0, mostrar.quantidadeProximos ?? 4), ctx)}
+        <p><a href="#/cronograma">Ver cronograma completo ›</a></p>
+      </div>`;
+  const direita = [
+    mostrar.series === false ? '' : progresso(ctx),
+    mostrar.pendencias === false ? '' : `<section id="pendencias"><h2 class="titulo-secao">Pendências.</h2>${listaPendencias(ctx)}</section>`,
+  ].join('');
+  const colunas = [blocoProximos, direita ? `<div>${direita}</div>` : ''].filter(Boolean);
   return `
     ${destaque(primeiro, ctx)}
-    ${contadores(ctx)}
-    <div class="duas-colunas">
-      <div>
-        <h2 class="titulo-secao">Próximos domingos.</h2>${listaDomingos(resto.slice(0, 4), ctx)}
-        <p><a href="#/cronograma">Ver cronograma completo ›</a></p>
-      </div>
-      <div>
-        ${progresso(ctx)}
-        <section id="pendencias"><h2 class="titulo-secao">Pendências.</h2>${listaPendencias(ctx)}</section>
-      </div>
-    </div>`;
+    ${mostrar.numeros === false ? '' : contadores(ctx)}
+    <div class="${colunas.length > 1 ? 'duas-colunas' : ''}">${colunas.join('')}</div>`;
 }
 
 export function ligar(ctx, raiz) {
