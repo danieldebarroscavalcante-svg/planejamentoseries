@@ -1,0 +1,33 @@
+{
+  "ano": 2027,
+  "titulo": "Ministrações 2027",
+  "fuso": "America/Sao_Paulo",
+  "fontes": {
+    "cronograma": "",
+    "equipe": "",
+    "datasEspeciais": ""
+  },
+  "limites": {
+    "diasAlerta": 30,
+    "pregacoesPorMes": 2,
+    "saudacoesPorMes": 2,
+    "avisarDomingosSeguidos": true
+  },
+  "statusValidos": ["A definir", "Planejado", "Confirmado", "Realizado", "Remanejado", "Sem ministração"],
+  "estrutura": {
+    "primeiroDomingo": "2027-01-10",
+    "ultimoDomingo": "2027-12-19",
+    "domingosComMensagem": 49,
+    "datasFixas": [
+      { "data": "2027-02-28", "serie": "Retiro", "descricao": "Retiro (sem ministração)" },
+      { "data": "2027-03-28", "serie": "Especial", "descricao": "Páscoa" }
+    ]
+  },
+  "series": [
+    { "prefixo": "Mateus", "curto": "Mateus", "cor": "#2F5D8A", "mensagens": 26, "rotuloEixo": "Cumprimento profético" },
+    { "prefixo": "Especial", "curto": "Páscoa", "cor": "#8A3B5C", "mensagens": 1, "rotuloEixo": "Cumprimento profético" },
+    { "prefixo": "Efésios", "curto": "Efésios", "cor": "#3F7D5A", "mensagens": 11, "rotuloEixo": "Eixo de identidade" },
+    { "prefixo": "Antigo Testamento", "curto": "Antigo Testamento", "cor": "#8A6A2F", "mensagens": 11, "rotuloEixo": "Cumprimento profético / Eixo de identidade" },
+    { "prefixo": "Retiro", "curto": "Retiro", "cor": "#6B7280", "mensagens": 0, "rotuloEixo": "" }
+  ]
+}
