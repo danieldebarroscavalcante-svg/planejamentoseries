@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Escala das ministrações de domingo: datas, textos, temas, preletores e saudação.">
+  <title>Ministrações</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A5A'/%3E%3Cpath d='M9 8h6a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H9zM23 8h-2a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H23z' fill='%23fff'/%3E%3C/svg%3E">
+  <script>
+    // Aplica claro/escuro e tamanho do texto antes de desenhar a página (evita "piscar").
+    // O restante da aparência é aplicado por js/aparencia.js.
+    (function () {
+      var p = {};
+      try { p = JSON.parse(localStorage.getItem('aparencia') || '{}') || {}; } catch (e) {}
+      var d = document.documentElement.dataset, z = p.zonas || {};
+      var tema = p.tema || 'escuro';
+      if (tema === 'auto') tema = matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+      d.tema = tema;
+      ['topo', 'destaque', 'cartoes', 'rodape'].forEach(function (k) {
+        if (z[k] === 'claro' || z[k] === 'escuro') d['z' + k[0].toUpperCase() + k.slice(1)] = z[k];
+      });
+      if (p.tamanho) document.documentElement.style.setProperty('--escala', p.tamanho);
+    })();
+  </script>
+  <link rel="stylesheet" href="css/estilo.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topo">
+    <div class="topo-interno">
+      <a class="marca" href="#/painel">Ministrações</a>
+      <a class="botao-aparencia" href="#/aparencia" data-nav="aparencia" aria-label="Aparência: claro, escuro, cores e mais" title="Aparência">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </a>
+      <nav class="menu" aria-label="Principal">
+        <a href="#/painel" data-nav="painel">Painel</a>
+        <a href="#/cronograma" data-nav="cronograma">Cronograma</a>
+        <a href="#/series" data-nav="series">Séries</a>
+        <a href="#/equipe" data-nav="equipe">Equipe</a>
+        <a href="#/imprimir" data-nav="imprimir">Imprimir</a>
+      </nav>
+    </div>
+  </header>
+  <main id="conteudo" tabindex="-1">
+    <p class="carregando">Carregando a escala…</p>
+  </main>
+  <footer class="rodape">
+    <p id="fonte"></p>
+  </footer>
+  <div id="aviso-rapido" role="status" hidden></div>
+  <noscript><p class="cartao">Este site precisa de JavaScript ligado no navegador.</p></noscript>
+</body>
+</html>
