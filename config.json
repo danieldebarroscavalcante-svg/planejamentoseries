@@ -13,6 +13,7 @@
     "saudacoesPorMes": 2,
     "avisarDomingosSeguidos": true
   },
+  "palavrasProlongado": ["prolongado", "emenda", "fim de semana com feriado"],
   "statusValidos": ["A definir", "Planejado", "Confirmado", "Realizado", "Remanejado", "Sem ministração"],
   "estrutura": {
     "primeiroDomingo": "2027-01-10",

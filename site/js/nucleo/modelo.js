@@ -39,7 +39,7 @@ const limpar = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
 /** Campo de pessoa vazio para fins de pendência ("", "—", "A definir"). */
 export function pessoaPendente(nome) {
   const n = semAcento(nome);
-  return n === '' || n === '—' || n === '-' || n === 'a definir';
+  return n === '' || n === '—' || n === '-' || n === 'a definir' || n.includes('[contato removido]');
 }
 
 // ---------- Proteção de privacidade ----------
@@ -181,4 +181,9 @@ export function montarBase({ cronograma, equipe, datasEspeciais }) {
 export function configDaSerie(nomeSerie, config) {
   const n = semAcento(nomeSerie);
   return (config?.series ?? []).find((s) => n.startsWith(semAcento(s.prefixo))) ?? null;
+}
+
+/** "João da Silva" → "joao-da-silva" (nome de arquivo da agenda .ics). */
+export function slug(nome) {
+  return semAcento(nome).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'sem-nome';
 }
